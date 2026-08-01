@@ -22,13 +22,15 @@ Sistema de faturação pensado para PMEs portuguesas: gerir clientes e produtos,
 - [x] Setup Next.js 16 + TypeScript + Tailwind 4
 - [x] Clientes Supabase (browser + server) com padrão SSR oficial
 - [x] Schema da base de dados com RLS (`supabase/schema.sql`)
-- [ ] Autenticação (email + magic link)
-- [ ] CRUD de clientes e produtos
-- [ ] Emissão de faturas com linhas e cálculo de IVA
-- [ ] Exportação de fatura em PDF
-- [ ] Dashboard com métricas (receita mensal, faturas por estado)
+- [x] Autenticação (email + password) com rotas protegidas via proxy
+- [x] CRUD de clientes e produtos (validação server-side)
+- [x] Emissão de faturas com linhas dinâmicas, IVA e numeração sequencial
+- [x] Máquina de estados da fatura (rascunho → emitida → paga/anulada)
+- [x] Fatura imprimível / exportável em PDF (impressão do browser)
+- [x] Dashboard com métricas (receita do mês, a receber, faturas recentes)
 - [ ] Testes (Vitest + Playwright) e CI
 - [ ] Deploy na Vercel
+- [ ] Download direto de PDF
 
 ## 🛠️ Stack
 
@@ -78,7 +80,7 @@ faturaflow/
 
 **Luiz Antonio** — Web Developer · Porto, Portugal
 
-📧 los486@hotmail.com · 💼 [Upwork](https://www.upwork.com/freelancers/~018a8878b023c31679) · 🌐 [Portfolio](https://losmanim.github.io/portfolio)
+📧 los486@hotmail.com · 🌐 [Portfolio](https://losmanim.github.io/portfolio)
 
 ## 📄 Licença
 
@@ -104,7 +106,7 @@ npm run dev
 
 ## Author
 
-**Luiz Antonio** — Web Developer, Porto, Portugal · [Upwork](https://www.upwork.com/freelancers/~018a8878b023c31679) · [Portfolio](https://losmanim.github.io/portfolio)
+**Luiz Antonio** — Web Developer, Porto, Portugal · [Portfolio](https://losmanim.github.io/portfolio)
 
 ## License
 

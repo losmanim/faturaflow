@@ -13,6 +13,7 @@ interface Linha {
   quantidade: number;
   preco: number;
   iva: number;
+  isencao: string;
 }
 
 let nextKey = 1;
@@ -23,6 +24,7 @@ const linhaVazia = (): Linha => ({
   quantidade: 1,
   preco: 0,
   iva: 23,
+  isencao: "",
 });
 
 const inputClass =
@@ -58,6 +60,21 @@ export function FaturaForm({
               descricao: p ? p.nome : l.descricao,
               preco: p ? Number(p.preco) : l.preco,
               iva: p ? Number(p.iva) : l.iva,
+              isencao: "",
+            }
+          : l
+      )
+    );
+  }
+
+  function alternarIsencao(key: number, ativo: boolean) {
+    setLinhas((ls) =>
+      ls.map((l) =>
+        l.key === key
+          ? {
+              ...l,
+              isencao: ativo ? "Isento — art.º 53.º do CIVA" : "",
+              iva: ativo ? 0 : 23,
             }
           : l
       )
@@ -115,6 +132,49 @@ export function FaturaForm({
         </select>
       </div>
 
+      {/* Pagamento */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="mb-4 text-sm font-semibold text-slate-700">Pagamento</h2>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label
+              htmlFor="data_vencimento"
+              className="mb-1 block text-sm font-medium text-slate-700"
+            >
+              Prazo de pagamento (vencimento)
+            </label>
+            <input
+              id="data_vencimento"
+              name="data_vencimento"
+              type="date"
+              className={`${inputClass} px-3`}
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="forma_pagamento"
+              className="mb-1 block text-sm font-medium text-slate-700"
+            >
+              Forma de pagamento
+            </label>
+            <select
+              id="forma_pagamento"
+              name="forma_pagamento"
+              defaultValue=""
+              className={`${inputClass} px-3`}
+            >
+              <option value="">Não especificar</option>
+              <option>Transferência bancária</option>
+              <option>MB WAY</option>
+              <option>Multibanco</option>
+              <option>Referência Multibanco</option>
+              <option>Dinheiro</option>
+              <option>Cartão</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
       {/* Linhas */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="mb-4 text-sm font-semibold text-slate-700">
@@ -137,6 +197,7 @@ export function FaturaForm({
               className="grid grid-cols-2 items-end gap-2 md:grid-cols-12"
             >
               <input type="hidden" name="produto_id" value={l.produto_id} />
+              <input type="hidden" name="isencao" value={l.isencao} />
 
               <div className="col-span-2 md:col-span-3">
                 <select
@@ -201,12 +262,24 @@ export function FaturaForm({
                   step="0.1"
                   value={l.iva}
                   onChange={(e) => atualizar(l.key, "iva", Number(e.target.value))}
-                  required
-                  className={inputClass}
+                  disabled={l.isencao !== ""}
+                  className={`${inputClass} disabled:bg-slate-100`}
                 />
               </div>
 
-              <div className="col-span-1 text-right">
+              <div className="col-span-1 flex items-center justify-end gap-2">
+                <label
+                  title="Isento de IVA (art.º 53.º do CIVA)"
+                  className="flex cursor-pointer items-center text-xs text-slate-500"
+                >
+                  <input
+                    type="checkbox"
+                    checked={l.isencao !== ""}
+                    onChange={(e) => alternarIsencao(l.key, e.target.checked)}
+                    className="mr-1 h-3.5 w-3.5 accent-indigo-600"
+                  />
+                  Isento
+                </label>
                 <button
                   type="button"
                   onClick={() =>

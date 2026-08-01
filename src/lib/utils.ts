@@ -24,6 +24,35 @@ export function calcTotais(
   return { subtotal, ivaTotal, total: subtotal + ivaTotal };
 }
 
+/**
+ * Resumo de IVA agrupado por taxa (para a fatura).
+ * Linhas com isenção são somadas à parte.
+ */
+export function resumoIVA(
+  linhas: { quantidade: number; preco_unitario: number; iva: number; isencao?: string | null }[]
+) {
+  const porTaxa = new Map<number, { taxa: number; base: number; iva: number }>();
+  let isento = 0;
+
+  for (const l of linhas) {
+    const base = l.quantidade * l.preco_unitario;
+    if (l.isencao) {
+      isento += base;
+      continue;
+    }
+    const taxa = Number(l.iva);
+    const atual = porTaxa.get(taxa) ?? { taxa, base: 0, iva: 0 };
+    atual.base += base;
+    atual.iva += (base * taxa) / 100;
+    porTaxa.set(taxa, atual);
+  }
+
+  return {
+    porTaxa: [...porTaxa.values()].sort((a, b) => b.taxa - a.taxa),
+    isento,
+  };
+}
+
 /** Classes Tailwind para o badge de cada estado de fatura. */
 export const ESTADO_BADGE: Record<string, string> = {
   rascunho: "bg-slate-100 text-slate-700",

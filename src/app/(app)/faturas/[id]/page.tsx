@@ -8,10 +8,11 @@ import {
   formatEUR,
   formatDate,
   calcTotais,
+  resumoIVA,
   ESTADO_BADGE,
   ESTADO_LABEL,
 } from "@/lib/utils";
-import type { FaturaCompleta } from "@/lib/types";
+import type { FaturaCompleta, Perfil } from "@/lib/types";
 
 const btnAcao =
   "rounded-lg px-4 py-2 text-sm font-medium transition";
@@ -34,7 +35,27 @@ export default async function FaturaPage({
 
   const fatura = data as FaturaCompleta;
   const totais = calcTotais(fatura.fatura_linhas);
+  const ivaResumo = resumoIVA(fatura.fatura_linhas);
   const { data: auth } = await supabase.auth.getUser();
+
+  // Dados do fornecedor (Definições) — resiliente se a tabela ainda não existir
+  let perfil: Perfil | null = null;
+  if (auth.user) {
+    const r = await supabase
+      .from("perfil")
+      .select("*")
+      .eq("user_id", auth.user.id)
+      .maybeSingle();
+    if (!r.error) perfil = r.data as Perfil | null;
+  }
+
+  const fornecedor = {
+    nome: perfil?.nome || "FaturaFlow",
+    nif: perfil?.nif || null,
+    morada: perfil?.morada || null,
+    email: perfil?.email || auth.user?.email || "",
+    telefone: perfil?.telefone || null,
+  };
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -90,16 +111,33 @@ export default async function FaturaPage({
         {/* Cabeçalho */}
         <div className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-200 pb-6">
           <div>
-            <p className="text-2xl font-bold text-indigo-600">FaturaFlow</p>
-            <p className="mt-1 text-sm text-slate-500">
-              {auth.user?.email}
-            </p>
+            <p className="text-lg font-bold text-slate-800">{fornecedor.nome}</p>
+            {fornecedor.nif && (
+              <p className="text-sm text-slate-600">NIF: {fornecedor.nif}</p>
+            )}
+            {fornecedor.morada && (
+              <p className="text-sm text-slate-600">{fornecedor.morada}</p>
+            )}
+            <p className="text-sm text-slate-600">{fornecedor.email}</p>
+            {fornecedor.telefone && (
+              <p className="text-sm text-slate-600">{fornecedor.telefone}</p>
+            )}
           </div>
           <div className="text-right">
-            <p className="text-lg font-bold text-slate-800">{fatura.numero}</p>
+            <p className="text-3xl font-extrabold uppercase tracking-wide text-slate-800">
+              Fatura
+            </p>
+            <p className="mt-2 text-lg font-bold text-slate-800">
+              {fatura.numero}
+            </p>
             <p className="text-sm text-slate-500">
               Emitida a {formatDate(fatura.data_emissao)}
             </p>
+            {fatura.data_vencimento && (
+              <p className="text-sm text-slate-500">
+                Vencimento: {formatDate(fatura.data_vencimento)}
+              </p>
+            )}
             <span
               className={`mt-2 inline-block rounded-full px-3 py-1 text-xs font-medium ${ESTADO_BADGE[fatura.estado]}`}
             >
@@ -143,7 +181,14 @@ export default async function FaturaPage({
           <tbody className="divide-y divide-slate-100">
             {fatura.fatura_linhas.map((l) => (
               <tr key={l.id}>
-                <td className="py-3 pr-4 text-slate-800">{l.descricao}</td>
+                <td className="py-3 pr-4 text-slate-800">
+                  {l.descricao}
+                  {l.isencao && (
+                    <span className="mt-0.5 block text-xs text-slate-400">
+                      {l.isencao}
+                    </span>
+                  )}
+                </td>
                 <td className="py-3 pr-4 text-right text-slate-600">
                   {Number(l.quantidade)}
                 </td>
@@ -151,7 +196,11 @@ export default async function FaturaPage({
                   {formatEUR(Number(l.preco_unitario))}
                 </td>
                 <td className="py-3 pr-4 text-right text-slate-600">
-                  {Number(l.iva)}%
+                  {l.isencao ? (
+                    <span className="text-xs text-slate-400">Isento</span>
+                  ) : (
+                    `${Number(l.iva)}%`
+                  )}
                 </td>
                 <td className="py-3 text-right font-medium text-slate-800">
                   {formatEUR(Number(l.quantidade) * Number(l.preco_unitario))}
@@ -163,19 +212,41 @@ export default async function FaturaPage({
 
         {/* Totais */}
         <div className="mt-6 flex justify-end">
-          <div className="w-64 space-y-2 border-t border-slate-200 pt-4 text-sm">
+          <div className="w-72 space-y-2 border-t border-slate-200 pt-4 text-sm">
+            {ivaResumo.porTaxa.map((r) => (
+              <div
+                key={r.taxa}
+                className="flex justify-between text-slate-600"
+              >
+                <span>
+                  Base à taxa de {r.taxa}% ({formatEUR(r.base)})
+                </span>
+                <span>IVA: {formatEUR(r.iva)}</span>
+              </div>
+            ))}
+            {ivaResumo.isento > 0 && (
+              <div className="flex justify-between text-slate-600">
+                <span>Não sujeito / Isento</span>
+                <span>{formatEUR(ivaResumo.isento)}</span>
+              </div>
+            )}
             <div className="flex justify-between text-slate-600">
               <span>Subtotal</span>
               <span>{formatEUR(totais.subtotal)}</span>
             </div>
             <div className="flex justify-between text-slate-600">
-              <span>IVA</span>
+              <span>Total IVA</span>
               <span>{formatEUR(totais.ivaTotal)}</span>
             </div>
             <div className="flex justify-between border-t border-slate-200 pt-2 text-base font-bold text-slate-800">
               <span>Total</span>
               <span>{formatEUR(totais.total)}</span>
             </div>
+            {fatura.forma_pagamento && (
+              <p className="pt-2 text-xs text-slate-500">
+                Pagamento: {fatura.forma_pagamento}
+              </p>
+            )}
           </div>
         </div>
 

@@ -27,6 +27,8 @@ export interface Fatura {
   cliente_id: string;
   numero: string;
   data_emissao: string;
+  data_vencimento: string | null;
+  forma_pagamento: string | null;
   estado: EstadoFatura;
   notas: string | null;
   created_at: string;
@@ -40,6 +42,18 @@ export interface FaturaLinha {
   quantidade: number;
   preco_unitario: number;
   iva: number;
+  isencao: string | null;
+}
+
+/** Dados do fornecedor (configurados em Definições) — aparecem nas faturas. */
+export interface Perfil {
+  user_id: string;
+  nome: string | null;
+  nif: string | null;
+  morada: string | null;
+  email: string | null;
+  telefone: string | null;
+  updated_at: string;
 }
 
 /** Fatura com joins do Supabase (cliente + linhas) */

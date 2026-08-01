@@ -9,6 +9,7 @@ const links = [
   { href: "/clientes", label: "Clientes", icon: "bi-people" },
   { href: "/produtos", label: "Produtos", icon: "bi-box-seam" },
   { href: "/faturas", label: "Faturas", icon: "bi-receipt" },
+  { href: "/definicoes", label: "Definições", icon: "bi-gear" },
 ];
 
 export function Sidebar({ email }: { email: string }) {

@@ -27,6 +27,8 @@ export async function createFatura(
 
   const clienteId = String(formData.get("cliente_id") ?? "");
   const notas = String(formData.get("notas") ?? "").trim() || null;
+  const dataVencimento = String(formData.get("data_vencimento") ?? "").trim() || null;
+  const formaPagamento = String(formData.get("forma_pagamento") ?? "").trim() || null;
   if (!clienteId) return { error: "Escolhe um cliente." };
 
   const descricoes = formData.getAll("descricao").map((v) => String(v).trim());
@@ -36,15 +38,24 @@ export async function createFatura(
   const produtoIds = formData
     .getAll("produto_id")
     .map((v) => String(v) || null);
+  const isencoes = formData
+    .getAll("isencao")
+    .map((v) => String(v).trim() || null);
 
   const linhas = descricoes
-    .map((descricao, i) => ({
-      descricao,
-      quantidade: quantidades[i],
-      preco_unitario: precos[i],
-      iva: ivas[i],
-      produto_id: produtoIds[i],
-    }))
+    .map((descricao, i) => {
+      const isencao = isencoes[i];
+      // Linha isenta: força IVA a 0 no servidor (nunca confia no cliente)
+      const iva = isencao ? 0 : ivas[i];
+      return {
+        descricao,
+        quantidade: quantidades[i],
+        preco_unitario: precos[i],
+        iva,
+        produto_id: produtoIds[i],
+        isencao,
+      };
+    })
     .filter(
       (l) =>
         l.descricao &&
@@ -76,6 +87,8 @@ export async function createFatura(
       cliente_id: clienteId,
       numero,
       notas,
+      data_vencimento: dataVencimento,
+      forma_pagamento: formaPagamento,
       estado: "rascunho",
     })
     .select("id")

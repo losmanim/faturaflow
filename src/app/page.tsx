@@ -4,52 +4,52 @@ import { createClient } from "@/lib/supabase/server";
 
 const features = [
   {
-    icon: "bi-people",
-    titulo: "Clientes & Produtos",
-    texto: "Base de clientes com NIF e catálogo de produtos com preços e IVA configuráveis.",
+    icon: "bi-person-badge",
+    titulo: "Feito para MEI e prestadores",
+    texto: "Emite NFS-e de serviço sem depender do portal da prefeitura. Pensado para quem vive de prestar serviços.",
   },
   {
     icon: "bi-receipt",
-    titulo: "Faturas com IVA automático",
-    texto: "Linhas dinâmicas com cálculo de totais em tempo real e numeração sequencial (FT 2026/0001).",
+    titulo: "NFS-e com status em tempo real",
+    texto: "Rascunho → autorizada (ou rejeitada). Acompanha protocolo, número da nota e código de verificação.",
   },
   {
     icon: "bi-arrow-repeat",
-    titulo: "Estados da fatura",
-    texto: "Fluxo controlado: rascunho → emitida → paga (ou anulada). Só rascunhos podem ser eliminados.",
+    titulo: "Máquina de estados da nota",
+    texto: "Fluxo fiscal controlado: só é possível emitir no estado correto e cancelar notas autorizadas.",
   },
   {
-    icon: "bi-printer",
-    titulo: "Exportação em PDF",
-    texto: "Documento de fatura profissional, pronto para imprimir ou guardar como PDF.",
+    icon: "bi-file-earmark-code",
+    titulo: "XML e PDF autorizados",
+    texto: "Guarda o XML da NFS-e e imprime o documento da nota — pronto para entregar ao seu cliente.",
   },
   {
-    icon: "bi-graph-up",
-    titulo: "Dashboard de métricas",
-    texto: "Receita do mês, valores a receber, totais de clientes e produtos, e faturas recentes.",
+    icon: "bi-diagram-3",
+    titulo: "Arquitetura com adaptador fiscal",
+    texto: "Camada anti-corrupção: troque de emissor (simulador, Focus NFe, SEFAZ) sem mexer no resto da app.",
   },
   {
     icon: "bi-shield-lock",
     titulo: "Segurança por desenho",
-    texto: "Row Level Security na base de dados — cada utilizador só acede aos próprios dados.",
+    texto: "Row Level Security no banco — cada usuário só acessa os próprios dados e notas.",
   },
 ];
 
 const passos = [
   {
     n: "1",
-    titulo: "Regista clientes e produtos",
-    texto: "Cria a tua base em segundos — nome, NIF, preços e IVA.",
+    titulo: "Configure sua empresa",
+    texto: "CNPJ, município e regime tributário (MEI ou Simples Nacional). Leva 1 minuto.",
   },
   {
     n: "2",
-    titulo: "Emite a fatura",
-    texto: "Escolhe o cliente, adiciona linhas a partir do catálogo e o total calcula-se sozinho.",
+    titulo: "Registre o cliente e o serviço",
+    texto: "CPF/CNPJ do tomador, código NBS e valor. O total é calculado automaticamente.",
   },
   {
     n: "3",
-    titulo: "Acompanha a receita",
-    texto: "Marca como paga e vê o dashboard atualizar em tempo real.",
+    titulo: "Emita a NFS-e",
+    texto: "A nota é processada, autorizada e você recebe o número + XML. Pronto para enviar.",
   },
 ];
 
@@ -65,7 +65,7 @@ export default async function Home() {
       {/* Navegação */}
       <header className="sticky top-0 z-10 border-b border-white/10 bg-indigo-950/80 backdrop-blur">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
-          <span className="text-xl font-bold">FaturaFlow</span>
+          <span className="text-xl font-bold">FaturaFlow-BR</span>
           <nav className="hidden items-center gap-6 text-sm text-indigo-200 md:flex">
             <a href="#funcionalidades" className="hover:text-white">
               Funcionalidades
@@ -94,14 +94,15 @@ export default async function Home() {
       {/* Hero */}
       <section className="mx-auto w-full max-w-6xl px-6 pb-16 pt-16 text-center md:pt-24">
         <span className="inline-block rounded-full border border-indigo-400/40 bg-indigo-400/10 px-4 py-1 text-xs font-medium text-indigo-300">
-          Faturação com IVA automático · Feito para PMEs
+          NFS-e para MEI e Simples Nacional · Feito para prestadores
         </span>
         <h1 className="mx-auto mt-6 max-w-3xl text-4xl font-extrabold leading-tight md:text-6xl">
-          Faturação simples para a tua empresa
+          Emita notas fiscais de serviço sem sofrimento
         </h1>
         <p className="mx-auto mt-6 max-w-xl text-lg text-indigo-200">
-          Clientes, produtos e faturas profissionais com cálculo de IVA —
-          num dashboard moderno. Sem complicações.
+          Clientes, serviços e NFS-e com status em tempo real, XML e PDF
+          autorizados — num painel moderno. O Simples Nacional já é tratado
+          para você.
         </p>
         <div className="mt-10 flex flex-wrap justify-center gap-4">
           <Link
@@ -137,16 +138,15 @@ export default async function Home() {
                 <div className="h-2 w-full rounded bg-indigo-600"></div>
                 <div className="h-2 w-4/5 rounded bg-slate-700"></div>
                 <div className="h-2 w-4/5 rounded bg-slate-700"></div>
-                <div className="h-2 w-4/5 rounded bg-slate-700"></div>
               </div>
               {/* Mini conteúdo */}
               <div className="flex-1 space-y-3 p-4">
                 <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
                   {[
-                    { label: "Receita do mês", valor: "3 450,00 €", cor: "bg-emerald-100" },
-                    { label: "A receber", valor: "861,00 €", cor: "bg-amber-100" },
+                    { label: "Faturado no mês", valor: "R$ 3.450,00", cor: "bg-emerald-100" },
+                    { label: "Notas autorizadas", valor: "12", cor: "bg-sky-100" },
                     { label: "Clientes", valor: "12", cor: "bg-indigo-100" },
-                    { label: "Produtos", valor: "8", cor: "bg-sky-100" },
+                    { label: "Rejeitadas", valor: "0", cor: "bg-slate-100" },
                   ].map((c) => (
                     <div
                       key={c.label}
@@ -160,9 +160,9 @@ export default async function Home() {
                 </div>
                 <div className="rounded-lg border border-slate-200 bg-white">
                   {[
-                    { n: "FT 2026/0012", c: "Padaria Central", v: "307,50 €", e: "Paga", cor: "bg-emerald-100 text-emerald-700" },
-                    { n: "FT 2026/0011", c: "Oficina Silva", v: "861,00 €", e: "Emitida", cor: "bg-amber-100 text-amber-700" },
-                    { n: "FT 2026/0010", c: "Café Avenida", v: "492,00 €", e: "Paga", cor: "bg-emerald-100 text-emerald-700" },
+                    { n: "NS 2026/0012", c: "Padaria Central", v: "R$ 307,50", e: "Autorizada", cor: "bg-emerald-100 text-emerald-700" },
+                    { n: "NS 2026/0011", c: "Oficina Silva", v: "R$ 861,00", e: "Autorizada", cor: "bg-emerald-100 text-emerald-700" },
+                    { n: "NS 2026/0010", c: "Café Avenida", v: "R$ 492,00", e: "Rascunho", cor: "bg-slate-100 text-slate-600" },
                   ].map((f) => (
                     <div
                       key={f.n}
@@ -192,10 +192,10 @@ export default async function Home() {
       <section id="funcionalidades" className="border-t border-white/10 py-20">
         <div className="mx-auto w-full max-w-6xl px-6">
           <h2 className="text-center text-3xl font-bold">
-            Tudo o que precisas para faturar
+            Tudo o que você precisa para emitir notas
           </h2>
           <p className="mx-auto mt-3 max-w-lg text-center text-indigo-200">
-            Do cliente à fatura paga — um fluxo completo e simples.
+            Do rascunho ao XML autorizado — um fluxo completo e fiscal.
           </p>
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((f) => (
@@ -234,7 +234,7 @@ export default async function Home() {
       <section className="border-t border-white/10 py-20 text-center">
         <h2 className="text-3xl font-bold">Pronto para começar?</h2>
         <p className="mx-auto mt-3 max-w-md text-indigo-200">
-          Cria a tua conta e emite a primeira fatura em menos de 5 minutos.
+          Crie sua conta e emita a primeira NFS-e em menos de 5 minutos.
         </p>
         <Link
           href="/registar"
@@ -243,12 +243,13 @@ export default async function Home() {
           Criar conta grátis
         </Link>
         <p className="mt-8 text-xs text-indigo-300">
-          Construído com Next.js · TypeScript · Tailwind · Supabase
+          Construído com Next.js · TypeScript · Tailwind · Supabase · Adaptador
+          fiscal (mock / Focus NFe)
         </p>
       </section>
 
       <footer className="border-t border-white/10 py-6 text-center text-xs text-indigo-300">
-        FaturaFlow © 2026 · Projeto de{" "}
+        FaturaFlow-BR © 2026 · Projeto de{" "}
         <a
           href="https://github.com/losmanim/faturaflow"
           target="_blank"

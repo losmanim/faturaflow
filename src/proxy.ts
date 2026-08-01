@@ -41,7 +41,8 @@ export async function proxy(request: NextRequest) {
     path.startsWith("/dashboard") ||
     path.startsWith("/clientes") ||
     path.startsWith("/produtos") ||
-    path.startsWith("/faturas");
+    path.startsWith("/faturas") ||
+    path.startsWith("/definicoes");
 
   if (!user && isAppPage) {
     const url = request.nextUrl.clone();

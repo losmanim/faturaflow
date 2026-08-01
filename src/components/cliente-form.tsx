@@ -33,11 +33,11 @@ export function ClienteForm({ cliente }: { cliente?: Cliente }) {
       <div className="grid gap-4 md:grid-cols-2">
         <Campo label="Nome *" name="nome" defaultValue={cliente?.nome ?? ""} required />
         <Campo
-          label="NIF"
-          name="nif"
-          defaultValue={cliente?.nif ?? ""}
-          maxLength={9}
-          placeholder="9 dígitos"
+          label="CPF / CNPJ"
+          name="cpf_cnpj"
+          defaultValue={cliente?.cpf_cnpj ?? ""}
+          maxLength={14}
+          placeholder="CPF (11) ou CNPJ (14)"
         />
         <Campo
           label="Email"
@@ -52,7 +52,7 @@ export function ClienteForm({ cliente }: { cliente?: Cliente }) {
         />
         <div className="md:col-span-2">
           <Campo
-            label="Morada"
+            label="Endereço"
             name="morada"
             defaultValue={cliente?.morada ?? ""}
           />

@@ -3,28 +3,26 @@
 import { useActionState, useState } from "react";
 import Link from "next/link";
 import { createFatura, type FormState } from "@/app/(app)/faturas/actions";
-import { formatEUR } from "@/lib/utils";
-import type { Cliente, Produto } from "@/lib/types";
+import { formatBRL } from "@/lib/utils";
+import type { Cliente, Perfil } from "@/lib/types";
 
 interface Linha {
   key: number;
-  produto_id: string;
   descricao: string;
   quantidade: number;
   preco: number;
-  iva: number;
-  isencao: string;
+  iss: number;
+  nbs: string;
 }
 
 let nextKey = 1;
-const linhaVazia = (): Linha => ({
+const linhaVazia = (iss = 0, nbs = ""): Linha => ({
   key: nextKey++,
-  produto_id: "",
   descricao: "",
   quantidade: 1,
   preco: 0,
-  iva: 23,
-  isencao: "",
+  iss,
+  nbs,
 });
 
 const inputClass =
@@ -32,16 +30,18 @@ const inputClass =
 
 export function FaturaForm({
   clientes,
-  produtos,
+  perfil,
 }: {
   clientes: Cliente[];
-  produtos: Produto[];
+  perfil?: Perfil | null;
 }) {
   const [state, formAction, pending] = useActionState<FormState, FormData>(
     createFatura,
     null
   );
-  const [linhas, setLinhas] = useState<Linha[]>([linhaVazia()]);
+  const [linhas, setLinhas] = useState<Linha[]>([
+    linhaVazia(Number(perfil?.aliq_iss ?? 0), perfil?.nbs_default ?? ""),
+  ]);
 
   function atualizar(key: number, campo: keyof Linha, valor: string | number) {
     setLinhas((ls) =>
@@ -49,48 +49,19 @@ export function FaturaForm({
     );
   }
 
-  function escolherProduto(key: number, produtoId: string) {
-    const p = produtos.find((pr) => pr.id === produtoId);
-    setLinhas((ls) =>
-      ls.map((l) =>
-        l.key === key
-          ? {
-              ...l,
-              produto_id: produtoId,
-              descricao: p ? p.nome : l.descricao,
-              preco: p ? Number(p.preco) : l.preco,
-              iva: p ? Number(p.iva) : l.iva,
-              isencao: "",
-            }
-          : l
-      )
-    );
-  }
-
-  function alternarIsencao(key: number, ativo: boolean) {
-    setLinhas((ls) =>
-      ls.map((l) =>
-        l.key === key
-          ? {
-              ...l,
-              isencao: ativo ? "Isento — art.º 53.º do CIVA" : "",
-              iva: ativo ? 0 : 23,
-            }
-          : l
-      )
-    );
-  }
-
   const subtotal = linhas.reduce((s, l) => s + l.quantidade * l.preco, 0);
-  const ivaTotal = linhas.reduce(
-    (s, l) => s + l.quantidade * l.preco * (l.iva / 100),
+  const issTotal = linhas.reduce(
+    (s, l) => s + l.quantidade * l.preco * (l.iss / 100),
     0
   );
+
+  const simNacional =
+    !perfil || perfil.regime_tributario === "MEI" || perfil.regime_tributario === "Simples Nacional";
 
   if (clientes.length === 0) {
     return (
       <div className="rounded-xl border border-amber-200 bg-amber-50 p-6 text-sm text-amber-800">
-        Precisas de criar pelo menos um cliente antes de faturar.{" "}
+        Precisa de criar pelo menos um cliente (tomador) antes de emitir.{" "}
         <Link href="/clientes/novo" className="font-medium underline">
           Criar cliente
         </Link>
@@ -106,87 +77,70 @@ export function FaturaForm({
         </div>
       )}
 
-      {/* Cliente */}
+      {/* Tomador + competência */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <label
-          htmlFor="cliente_id"
-          className="mb-1 block text-sm font-medium text-slate-700"
-        >
-          Cliente *
-        </label>
-        <select
-          id="cliente_id"
-          name="cliente_id"
-          required
-          defaultValue=""
-          className={`${inputClass} max-w-md px-3`}
-        >
-          <option value="" disabled>
-            Escolher cliente...
-          </option>
-          {clientes.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.nome}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Pagamento */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="mb-4 text-sm font-semibold text-slate-700">Pagamento</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label
-              htmlFor="data_vencimento"
+              htmlFor="cliente_id"
               className="mb-1 block text-sm font-medium text-slate-700"
             >
-              Prazo de pagamento (vencimento)
-            </label>
-            <input
-              id="data_vencimento"
-              name="data_vencimento"
-              type="date"
-              className={`${inputClass} px-3`}
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="forma_pagamento"
-              className="mb-1 block text-sm font-medium text-slate-700"
-            >
-              Forma de pagamento
+              Tomador (cliente) *
             </label>
             <select
-              id="forma_pagamento"
-              name="forma_pagamento"
+              id="cliente_id"
+              name="cliente_id"
+              required
               defaultValue=""
               className={`${inputClass} px-3`}
             >
-              <option value="">Não especificar</option>
-              <option>Transferência bancária</option>
-              <option>MB WAY</option>
-              <option>Multibanco</option>
-              <option>Referência Multibanco</option>
-              <option>Dinheiro</option>
-              <option>Cartão</option>
+              <option value="" disabled>
+                Escolher cliente...
+              </option>
+              {clientes.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.nome}
+                  {c.cpf_cnpj ? ` — ${c.cpf_cnpj}` : " (sem CPF/CNPJ)"}
+                </option>
+              ))}
             </select>
+          </div>
+          <div>
+            <label
+              htmlFor="competencia"
+              className="mb-1 block text-sm font-medium text-slate-700"
+            >
+              Competência (mês da prestação)
+            </label>
+            <input
+              id="competencia"
+              name="competencia"
+              type="month"
+              className={`${inputClass} px-3`}
+            />
           </div>
         </div>
       </div>
 
-      {/* Linhas */}
+      {/* Serviços */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="mb-4 text-sm font-semibold text-slate-700">
-          Linhas da fatura
-        </h2>
+        <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-sm font-semibold text-slate-700">
+            Serviços prestados
+          </h2>
+          {simNacional && (
+            <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs text-emerald-700">
+              Simples Nacional — ISS recolhido via DAS (alíquota 0%)
+            </span>
+          )}
+        </div>
 
         <div className="mb-2 hidden grid-cols-12 gap-2 text-xs font-medium uppercase text-slate-400 md:grid">
-          <span className="col-span-3">Produto</span>
           <span className="col-span-4">Descrição</span>
+          <span className="col-span-3">Código NBS</span>
           <span className="col-span-1">Qtd</span>
-          <span className="col-span-2">Preço €</span>
-          <span className="col-span-1">IVA %</span>
+          <span className="col-span-2">Valor R$</span>
+          <span className="col-span-1">ISS %</span>
           <span className="col-span-1"></span>
         </div>
 
@@ -196,36 +150,29 @@ export function FaturaForm({
               key={l.key}
               className="grid grid-cols-2 items-end gap-2 md:grid-cols-12"
             >
-              <input type="hidden" name="produto_id" value={l.produto_id} />
-              <input type="hidden" name="isencao" value={l.isencao} />
-
-              <div className="col-span-2 md:col-span-3">
-                <select
-                  value={l.produto_id}
-                  onChange={(e) => escolherProduto(l.key, e.target.value)}
-                  className={inputClass}
-                >
-                  <option value="">Personalizado</option>
-                  {produtos.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.nome}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
               <div className="col-span-2 md:col-span-4">
                 <input
                   name="descricao"
                   value={l.descricao}
                   onChange={(e) => atualizar(l.key, "descricao", e.target.value)}
-                  placeholder="Descrição *"
+                  placeholder="Descrição do serviço *"
                   required
                   className={inputClass}
                 />
               </div>
 
-              <div className="col-span-1">
+              <div className="col-span-1 md:col-span-3">
+                <input
+                  name="nbs"
+                  value={l.nbs}
+                  onChange={(e) => atualizar(l.key, "nbs", e.target.value)}
+                  placeholder="Ex.: 1.01.01"
+                  required
+                  className={inputClass}
+                />
+              </div>
+
+              <div className="col-span-1 md:col-span-1">
                 <input
                   name="quantidade"
                   type="number"
@@ -253,33 +200,20 @@ export function FaturaForm({
                 />
               </div>
 
-              <div className="col-span-1">
+              <div className="col-span-1 md:col-span-1">
                 <input
-                  name="iva"
+                  name="iss"
                   type="number"
                   min="0"
                   max="100"
                   step="0.1"
-                  value={l.iva}
-                  onChange={(e) => atualizar(l.key, "iva", Number(e.target.value))}
-                  disabled={l.isencao !== ""}
+                  value={l.iss}
+                  onChange={(e) => atualizar(l.key, "iss", Number(e.target.value))}
                   className={`${inputClass} disabled:bg-slate-100`}
                 />
               </div>
 
-              <div className="col-span-1 flex items-center justify-end gap-2">
-                <label
-                  title="Isento de IVA (art.º 53.º do CIVA)"
-                  className="flex cursor-pointer items-center text-xs text-slate-500"
-                >
-                  <input
-                    type="checkbox"
-                    checked={l.isencao !== ""}
-                    onChange={(e) => alternarIsencao(l.key, e.target.checked)}
-                    className="mr-1 h-3.5 w-3.5 accent-indigo-600"
-                  />
-                  Isento
-                </label>
+              <div className="col-span-1 flex items-center justify-end">
                 <button
                   type="button"
                   onClick={() =>
@@ -298,21 +232,29 @@ export function FaturaForm({
 
         <button
           type="button"
-          onClick={() => setLinhas((ls) => [...ls, linhaVazia()])}
+          onClick={() =>
+            setLinhas((ls) => [
+              ...ls,
+              linhaVazia(Number(perfil?.aliq_iss ?? 0), ""),
+            ])
+          }
           className="mt-4 text-sm font-medium text-indigo-600 hover:underline"
         >
-          <i className="bi bi-plus-lg mr-1"></i> Adicionar linha
+          <i className="bi bi-plus-lg mr-1"></i> Adicionar serviço
         </button>
 
         <div className="mt-6 space-y-1 border-t border-slate-200 pt-4 text-right text-sm">
           <p className="text-slate-500">
-            Subtotal: <span className="font-medium">{formatEUR(subtotal)}</span>
+            Valor dos serviços:{" "}
+            <span className="font-medium">{formatBRL(subtotal)}</span>
           </p>
-          <p className="text-slate-500">
-            IVA: <span className="font-medium">{formatEUR(ivaTotal)}</span>
-          </p>
+          {issTotal > 0 && (
+            <p className="text-slate-500">
+              ISS: <span className="font-medium">{formatBRL(issTotal)}</span>
+            </p>
+          )}
           <p className="text-lg font-bold text-slate-800">
-            Total: {formatEUR(subtotal + ivaTotal)}
+            Total: {formatBRL(subtotal + issTotal)}
           </p>
         </div>
       </div>
@@ -323,13 +265,13 @@ export function FaturaForm({
           htmlFor="notas"
           className="mb-1 block text-sm font-medium text-slate-700"
         >
-          Notas
+          Observações
         </label>
         <textarea
           id="notas"
           name="notas"
           rows={2}
-          placeholder="Observações a incluir na fatura (opcional)"
+          placeholder="Informações complementares (opcional)"
           className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
         />
       </div>
@@ -340,7 +282,7 @@ export function FaturaForm({
           disabled={pending}
           className="rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
         >
-          {pending ? "A criar..." : "Criar fatura"}
+          {pending ? "A criar..." : "Criar nota (rascunho)"}
         </button>
         <Link
           href="/faturas"

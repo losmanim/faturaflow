@@ -21,7 +21,7 @@ function validar(dados: ReturnType<typeof lerForm>): string | null {
     return "O preço deve ser um número igual ou superior a 0.";
   }
   if (isNaN(dados.iva) || dados.iva < 0 || dados.iva > 100) {
-    return "O IVA deve estar entre 0 e 100.";
+    return "O ISS deve estar entre 0 e 100.";
   }
   return null;
 }

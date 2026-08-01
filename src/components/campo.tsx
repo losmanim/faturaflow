@@ -8,6 +8,7 @@ export function Campo({
   maxLength,
   step,
   min,
+  max,
   placeholder,
 }: {
   label: string;
@@ -18,6 +19,7 @@ export function Campo({
   maxLength?: number;
   step?: string;
   min?: string;
+  max?: string;
   placeholder?: string;
 }) {
   return (
@@ -37,6 +39,7 @@ export function Campo({
         maxLength={maxLength}
         step={step}
         min={min}
+        max={max}
         placeholder={placeholder}
         className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
       />

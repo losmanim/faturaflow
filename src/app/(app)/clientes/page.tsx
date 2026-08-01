@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { deleteCliente } from "./actions";
 import { ConfirmDelete } from "@/components/confirm-delete";
+import { formatDocumento } from "@/lib/utils";
 import type { Cliente } from "@/lib/types";
 
 export default async function ClientesPage() {
@@ -48,7 +49,7 @@ export default async function ClientesPage() {
             <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-500">
               <tr>
                 <th className="px-6 py-3 font-medium">Nome</th>
-                <th className="px-6 py-3 font-medium">NIF</th>
+                <th className="px-6 py-3 font-medium">CPF / CNPJ</th>
                 <th className="px-6 py-3 font-medium">Email</th>
                 <th className="px-6 py-3 font-medium">Telefone</th>
                 <th className="px-6 py-3 text-right font-medium">Ações</th>
@@ -60,7 +61,9 @@ export default async function ClientesPage() {
                   <td className="px-6 py-3 font-medium text-slate-800">
                     {c.nome}
                   </td>
-                  <td className="px-6 py-3 text-slate-600">{c.nif ?? "—"}</td>
+                  <td className="px-6 py-3 text-slate-600">
+                    {formatDocumento(c.cpf_cnpj) || "—"}
+                  </td>
                   <td className="px-6 py-3 text-slate-600">{c.email ?? "—"}</td>
                   <td className="px-6 py-3 text-slate-600">
                     {c.telefone ?? "—"}

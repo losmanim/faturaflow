@@ -31,7 +31,7 @@ export function AuthForm({ mode }: { mode: "login" | "registar" }) {
           type="email"
           required
           autoComplete="email"
-          placeholder="nome@empresa.pt"
+          placeholder="nome@empresa.com.br"
           className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
         />
       </div>
@@ -62,8 +62,8 @@ export function AuthForm({ mode }: { mode: "login" | "registar" }) {
       >
         {pending
           ? mode === "login"
-            ? "A entrar..."
-            : "A criar conta..."
+            ? "Entrando..."
+            : "Criando conta..."
           : mode === "login"
             ? "Entrar"
             : "Criar conta"}

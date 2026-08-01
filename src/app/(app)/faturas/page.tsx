@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import {
-  formatEUR,
+  formatBRL,
   formatDate,
   calcTotais,
-  ESTADO_BADGE,
-  ESTADO_LABEL,
+  NOTA_BADGE,
+  NOTA_LABEL,
 } from "@/lib/utils";
 import type { FaturaCompleta } from "@/lib/types";
 
@@ -13,7 +13,7 @@ export default async function FaturasPage() {
   const supabase = await createClient();
   const { data } = await supabase
     .from("faturas")
-    .select("*, clientes(nome), fatura_linhas(quantidade, preco_unitario, iva)")
+    .select("*, clientes(nome), fatura_linhas(quantidade, preco_unitario, iss)")
     .order("created_at", { ascending: false });
 
   const faturas = (data ?? []) as FaturaCompleta[];
@@ -22,29 +22,29 @@ export default async function FaturasPage() {
     <div>
       <header className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Faturas</h1>
+          <h1 className="text-2xl font-bold text-slate-800">Notas de serviço</h1>
           <p className="text-sm text-slate-500">
             {faturas.length}{" "}
-            {faturas.length === 1 ? "fatura emitida" : "faturas no total"}
+            {faturas.length === 1 ? "nota no total" : "notas no total"}
           </p>
         </div>
         <Link
           href="/faturas/nova"
           className="rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700"
         >
-          <i className="bi bi-plus-lg mr-1"></i> Nova fatura
+          <i className="bi bi-plus-lg mr-1"></i> Nova nota
         </Link>
       </header>
 
       {faturas.length === 0 ? (
         <div className="rounded-2xl border-2 border-dashed border-slate-300 bg-white p-12 text-center">
           <i className="bi bi-receipt text-4xl text-slate-300"></i>
-          <p className="mt-4 text-slate-500">Ainda não tens faturas.</p>
+          <p className="mt-4 text-slate-500">Ainda não tens notas.</p>
           <Link
             href="/faturas/nova"
             className="mt-2 inline-block font-medium text-indigo-600 hover:underline"
           >
-            Criar a primeira fatura
+            Criar a primeira nota
           </Link>
         </div>
       ) : (
@@ -53,9 +53,10 @@ export default async function FaturasPage() {
             <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-500">
               <tr>
                 <th className="px-6 py-3 font-medium">Número</th>
-                <th className="px-6 py-3 font-medium">Cliente</th>
+                <th className="px-6 py-3 font-medium">Tomador</th>
                 <th className="px-6 py-3 font-medium">Data</th>
-                <th className="px-6 py-3 font-medium">Estado</th>
+                <th className="px-6 py-3 font-medium">NFS-e</th>
+                <th className="px-6 py-3 font-medium">Status</th>
                 <th className="px-6 py-3 text-right font-medium">Total</th>
               </tr>
             </thead>
@@ -76,15 +77,18 @@ export default async function FaturasPage() {
                   <td className="px-6 py-3 text-slate-600">
                     {formatDate(f.data_emissao)}
                   </td>
+                  <td className="px-6 py-3 text-slate-600">
+                    {f.numero_nfse ?? "—"}
+                  </td>
                   <td className="px-6 py-3">
                     <span
-                      className={`inline-block rounded-full px-2.5 py-1 text-xs font-medium ${ESTADO_BADGE[f.estado]}`}
+                      className={`inline-block rounded-full px-2.5 py-1 text-xs font-medium ${NOTA_BADGE[f.status_nota]}`}
                     >
-                      {ESTADO_LABEL[f.estado]}
+                      {NOTA_LABEL[f.status_nota]}
                     </span>
                   </td>
                   <td className="px-6 py-3 text-right font-medium text-slate-800">
-                    {formatEUR(calcTotais(f.fatura_linhas).total)}
+                    {formatBRL(calcTotais(f.fatura_linhas).total)}
                   </td>
                 </tr>
               ))}

@@ -43,7 +43,7 @@ export function ProdutoForm({ produto }: { produto?: Produto }) {
           defaultValue={produto?.descricao ?? ""}
         />
         <Campo
-          label="Preço (€) *"
+          label="Preço (R$) *"
           name="preco"
           type="number"
           step="0.01"
@@ -52,12 +52,12 @@ export function ProdutoForm({ produto }: { produto?: Produto }) {
           required
         />
         <Campo
-          label="IVA (%) *"
+          label="ISS (%) *"
           name="iva"
           type="number"
           step="0.1"
           min="0"
-          defaultValue={produto ? Number(produto.iva) : 23}
+          defaultValue={produto ? Number(produto.iva) : 0}
           required
         />
       </div>

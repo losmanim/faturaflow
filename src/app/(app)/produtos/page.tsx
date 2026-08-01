@@ -2,7 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { deleteProduto } from "./actions";
 import { ConfirmDelete } from "@/components/confirm-delete";
-import { formatEUR } from "@/lib/utils";
+import { formatBRL } from "@/lib/utils";
 import type { Produto } from "@/lib/types";
 
 export default async function ProdutosPage() {
@@ -35,7 +35,7 @@ export default async function ProdutosPage() {
       {produtos.length === 0 ? (
         <div className="rounded-2xl border-2 border-dashed border-slate-300 bg-white p-12 text-center">
           <i className="bi bi-box-seam text-4xl text-slate-300"></i>
-          <p className="mt-4 text-slate-500">Ainda não tens produtos.</p>
+          <p className="mt-4 text-slate-500">Ainda não tem produtos.</p>
           <Link
             href="/produtos/novo"
             className="mt-2 inline-block font-medium text-indigo-600 hover:underline"
@@ -51,7 +51,7 @@ export default async function ProdutosPage() {
                 <th className="px-6 py-3 font-medium">Nome</th>
                 <th className="px-6 py-3 font-medium">Descrição</th>
                 <th className="px-6 py-3 text-right font-medium">Preço</th>
-                <th className="px-6 py-3 text-right font-medium">IVA</th>
+                <th className="px-6 py-3 text-right font-medium">ISS</th>
                 <th className="px-6 py-3 text-right font-medium">Ações</th>
               </tr>
             </thead>
@@ -65,7 +65,7 @@ export default async function ProdutosPage() {
                     {p.descricao ?? "—"}
                   </td>
                   <td className="px-6 py-3 text-right text-slate-800">
-                    {formatEUR(Number(p.preco))}
+                    {formatBRL(Number(p.preco))}
                   </td>
                   <td className="px-6 py-3 text-right text-slate-600">
                     {Number(p.iva)}%

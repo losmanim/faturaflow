@@ -14,9 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FaturaFlow — Faturação simples para PMEs",
+  title: "FaturaFlow-BR — Emissor de NFS-e para MEI e Simples Nacional",
   description:
-    "SaaS de faturação para pequenas e médias empresas: clientes, produtos e faturas com IVA. Construído com Next.js, TypeScript, Tailwind e Supabase.",
+    "SaaS de emissão de NFS-e (Nota Fiscal de Serviços Eletrônica) para MEI e prestadores de serviço no Simples Nacional. Construído com Next.js, TypeScript, Tailwind e Supabase.",
 };
 
 export default function RootLayout({
@@ -26,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="pt"
+      lang="pt-BR"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full">{children}</body>

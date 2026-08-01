@@ -9,7 +9,7 @@ export type FormState = { error: string } | null;
 function lerForm(formData: FormData) {
   return {
     nome: String(formData.get("nome") ?? "").trim(),
-    nif: String(formData.get("nif") ?? "").trim() || null,
+    cpf_cnpj: String(formData.get("cpf_cnpj") ?? "").replace(/\D/g, "") || null,
     email: String(formData.get("email") ?? "").trim() || null,
     telefone: String(formData.get("telefone") ?? "").trim() || null,
     morada: String(formData.get("morada") ?? "").trim() || null,
@@ -21,8 +21,8 @@ function validar(dados: ReturnType<typeof lerForm>): string | null {
   if (dados.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(dados.email)) {
     return "Email inválido.";
   }
-  if (dados.nif && !/^\d{9}$/.test(dados.nif)) {
-    return "O NIF deve ter exatamente 9 dígitos.";
+  if (dados.cpf_cnpj && !/^(\d{11}|\d{14})$/.test(dados.cpf_cnpj)) {
+    return "CPF deve ter 11 dígitos ou CNPJ 14 dígitos.";
   }
   return null;
 }

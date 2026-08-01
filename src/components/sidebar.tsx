@@ -7,8 +7,7 @@ import { logout } from "@/app/(auth)/actions";
 const links = [
   { href: "/dashboard", label: "Dashboard", icon: "bi-speedometer2" },
   { href: "/clientes", label: "Clientes", icon: "bi-people" },
-  { href: "/produtos", label: "Produtos", icon: "bi-box-seam" },
-  { href: "/faturas", label: "Faturas", icon: "bi-receipt" },
+  { href: "/faturas", label: "Notas de serviço", icon: "bi-receipt" },
   { href: "/definicoes", label: "Definições", icon: "bi-gear" },
 ];
 
@@ -21,7 +20,7 @@ export function Sidebar({ email }: { email: string }) {
         href="/dashboard"
         className="px-6 py-5 text-xl font-bold text-white"
       >
-        FaturaFlow
+        FaturaFlow-BR
       </Link>
 
       <nav className="flex-1 space-y-1 px-3">
